@@ -1,0 +1,30 @@
+{
+    "workbench.colorTheme": "Catppuccin Mocha",
+    "workbench.iconTheme": "catppuccin-mocha",
+    "security.workspace.trust.untrustedFiles": "open",
+    "python.createEnvironment.trigger": "off",
+    "explorer.confirmDelete": false,
+    "explorer.confirmPasteNative": false,
+    "terminal.integrated.enableMultiLinePasteWarning": false,
+    "terminal.integrated.defaultProfile.windows": "PowerShell Admin",
+    "terminal.integrated.profiles.windows": {
+        
+        "PowerShell Admin": {
+            "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "Start-Process powershell -Verb RunAs"
+            ],
+            "icon": "terminal-powershell"
+        },
+        "CMD Admin": {
+            "path": "C:\\Windows\\System32\\cmd.exe",
+            "args": [
+                "/k",
+                "runas /user:Administrator cmd"
+            ],
+            "icon": "terminal-cmd"
+        }
+    }
+}
