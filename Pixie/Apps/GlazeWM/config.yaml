@@ -1,0 +1,237 @@
+# visit https://github.com/fathulfahmy/glazewm for catppuccin theme
+# mocha.yaml
+white: &white "#ffffff"
+rosewater: &rosewater "#f4dbd6"
+flamingo: &flamingo "#f0c6c6"
+pink: &pink "#f5bde6"
+mauve: &mauve "#c6a0f6"
+red: &red "#ed8796"
+maroon: &maroon "#ee99a0"
+peach: &peach "#f5a97f"
+yellow: &yellow "#eed49f"
+green: &green "#a6da95"
+teal: &teal "#8bd5ca"
+sky: &sky "#91d7e3"
+sapphire: &sapphire "#7dc4e4"
+blue: &blue "#8aadf4"
+lavender: &lavender "#b7bdf8"
+text: &text "#cad3f5"
+subtext1: &subtext1 "#b8c0e0"
+subtext0: &subtext0 "#a5adcb"
+overlay2: &overlay2 "#939ab7"
+overlay1: &overlay1 "#8087a2"
+overlay0: &overlay0 "#6e738d"
+surface2: &surface2 "#5b6078"
+surface1: &surface1 "#494d64"
+surface0: &surface0 "#363a4f"
+base: &base "#24273a"
+mantle: &mantle "#1e2030"
+crust: &crust "#181926"
+
+lesbian1: &lesbian1 "#d42c00"
+lesbian2: &lesbian2 "#fd9855"
+lesbian3: &lesbian3 "#ffffff"
+lesbian4: &lesbian4 "#d161a2"
+lesbian5: &lesbian5 "#a20161"
+
+trans1: &trans1 "#5BCEFA"
+trans2: &trans2 "#F5A9B8"
+trans3: &trans3 "#ffffff"
+
+bar:
+  height: "40px"
+  position: "bottom"
+  opacity: 1.0
+  background: *crust
+  foreground: *rosewater
+  font_family: "SpaceMono Nerd Font"
+  font_size: "14px"
+  padding: "4px 4px"
+  offset_x: "0"
+  offset_y: "-5"
+  border_radius: "0"
+  border_width: "5"
+  border_color: "transparent"
+
+  components_left:
+    - type: "workspaces"
+      # current active workspace
+      focused_workspace_background: *surface0
+      focused_workspace_foreground: *rosewater
+      default_workspace_background: *base
+
+    - type: "text file"
+      # Path to file.
+      file_path: "C:\\Users\\Aubrey\\Documents\\Tweaks\\Glaze\\blank.txt"
+
+    - type: "clock"
+      time_formatting: " 󰥔 hh:mm tt "
+      background: *base
+      foreground: *rosewater
+      border_radius: "100"
+
+  components_center:
+    - type: "music"
+      label_not_playing: " no song 3: "
+      label_paused: "    {song_title} - {artist_name}  "
+      label_playing: "    {song_title} - {artist_name}  "
+      max_title_length: 100
+      max_artist_length: 100
+      foreground: *rosewater
+      background: *base
+      
+  components_right:
+    - type: "volume"
+      label_low: "   {volume_level}% "
+      label_medium:  "  󰖀 {volume_level}% "
+      label_high: "  󰕾 {volume_level}% "
+      label_mute: "  󰝟 {volume_level}% "
+      foreground: *rosewater
+      background: *base
+
+gaps:
+  inner_gap: 20 # default 20
+  outer_gap: 25 # default 20
+
+general:
+  # Whether to show floating windows as always on top.
+  show_floating_on_top: true
+  center_new_floating_windows: true
+  focus_follows_cursor: false
+
+workspaces:
+  - name: "1"
+  - name: "2"
+  - name: "3"
+  - name: "4"
+
+window_rules:
+  # Task Manager requires admin privileges to manage and should be ignored unless running
+  # the WM as admin.
+  - command: "ignore"
+    match_process_name: "Taskmgr"
+
+  - command: "ignore"
+    match_process_name: "keyviz"
+
+  - command: "ignore"
+    match_process_name: "javaw"
+
+  - command: "ignore"
+    match_process_name: "sharex"
+
+  - command: "ignore"
+    match_process_name: "SystemInformer"
+
+  - command: "ignore"
+    match_process_name: "rundll"
+
+  # Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
+  - command: "set floating"
+    match_class_name: "#32770"
+
+binding_modes:
+  - name: "resize"
+    keybindings:
+      # Resize focused window by a percentage or pixel amount.
+      - command: "resize width -2%"
+        bindings: ["H", "Left"]
+      - command: "resize width +2%"
+        bindings: ["L", "Right"]
+      - command: "resize height +2%"
+        bindings: ["K", "Up"]
+      - command: "resize height -2%"
+        bindings: ["J", "Down"]
+      # Press enter/escape to return to default keybindings.
+      - command: "binding mode none"
+        bindings: ["Escape", "Enter"]
+
+keybindings:
+  # Shift focus in a given direction.
+  - command: "focus left"
+    bindings: ["Alt+H", "Alt+Left"]
+  - command: "focus right"
+    bindings: ["Alt+L", "Alt+Right"]
+  - command: "focus up"
+    bindings: ["Alt+K", "Alt+Up"]
+  - command: "focus down"
+    bindings: ["Alt+J", "Alt+Down"]
+
+    # Move focused window in a given direction.
+  - command: "move left"
+    bindings: ["Ctrl+Alt+Left"]
+  - command: "move right"
+    bindings: ["Ctrl+Alt+Right"]
+  - command: "move up"
+    bindings: ["Ctrl+Alt+Up"]
+  - command: "move down"
+    bindings: ["Ctrl+Alt+Down"]
+
+  # Resize focused window by a percentage or pixel amount.
+  - command: "resize width -2%"
+    binding: "Alt+Q"
+  - command: "resize width +2%"
+    binding: "Alt+E"
+  - command: "resize height +2%"
+    binding: "Alt+W"
+  - command: "resize height -2%"
+    binding: "Alt+S"
+
+  # Change the focused window to be floating / tiling.
+  - command: "toggle floating"
+    binding: "Ctrl+Alt+Space"
+
+  # Change the focused window to be maximized / unmaximized.
+  - command: "toggle maximized"
+    binding: "Ctrl+Alt+X"
+
+  # Minimize focused window.
+  - command: "set minimized"
+    binding: "Ctrl+Alt+Z"
+
+  # Close focused window.
+  - command: "close"
+    binding: "Alt+Shift+Q"
+
+  # Kill GlazeWM process safely.
+  - command: "exit wm"
+    binding: "Alt+Shift+E"
+
+  # Re-evaluate configuration file.
+  - command: "reload config"
+    binding: "Alt+Shift+R"
+
+  # Launch CMD terminal (alternatively `exec wt` or `exec %ProgramFiles%/Git/git-bash.exe`
+  # to start Windows Terminal and Git Bash respectively.
+  - command: "exec wt"
+    binding: "Alt+Enter"
+
+  # Focus the workspace that last had focus.
+  - command: "focus workspace recent"
+    binding: "Alt+Y"
+
+  # Focus the next/previous workspace defined in `workspaces` config.
+  - command: "focus workspace next"
+    binding: "Alt+T"
+  - command: "focus workspace prev"
+    binding: "Alt+Shift+T"
+
+  # Change focus to a workspace defined in `workspaces` config.
+  - command: "focus workspace 1"
+    binding: "Alt+1"
+  - command: "focus workspace 2"
+    binding: "Alt+2"
+  - command: "focus workspace 3"
+    binding: "Alt+3"
+  - command: "focus workspace 4"
+    binding: "Alt+4"
+
+  # Move focused window to a workspace defined in `workspaces` config.
+  - commands: ["move to workspace 1"]
+    binding: "Alt+Shift+1"
+  - commands: ["move to workspace 2"]
+    binding: "Alt+Shift+2"
+  - commands: ["move to workspace 3"]
+    binding: "Alt+Shift+3"
+  - commands: ["move to workspace 4"]
+    binding: "Alt+Shift+4"
