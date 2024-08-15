@@ -17,10 +17,16 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+type AppConfig struct {
+	SourcePath string
+	DestPath   string
+}
+
 type Config struct {
 	RepoURL string
 	Dirs    []string
 	Pkgs    []string
+	Apps    map[string]AppConfig
 }
 
 type Logger struct {
@@ -46,8 +52,14 @@ var (
 func init() {
 	cfg = Config{
 		RepoURL: "https://github.com/aubreyrs/Configs",
-		Dirs:    []string{"Forge", "Wallpapers", "Testing", "Tweaks", "Git"},
+		Dirs:    []string{"Forge", "Wallpapers", "Testing", "Tweaks", "Git", "Minecraft", "Scripts"},
 		Pkgs:    []string{"mingw", "prismlauncher", "rustup.install", "bun", "go", "spotify", "spicetify-cli", "llvm", "ninja", "sharex", "ffmpeg", "jetbrainstoolbox", "vscode", "firefox", "python", "7zip", "git", "sysinternals", "openssl", "wireshark", "make", "cmake", "audacity", "lghub", "mullvad-app", "discord", "wireguard", "ghidra"},
+		Apps: map[string]AppConfig{
+			"GlazeWM": {
+				SourcePath: "Pixie/Apps/GlazeWM/config.yaml",
+				DestPath:   "${USERPROFILE}/.glaze-wm/config.yaml",
+			},
+		},
 	}
 
 	flavour := catppuccin.Mocha
@@ -115,6 +127,9 @@ func run() error {
 	logger.Println("Pixie setup script completed successfully")
 
 	if restart() {
+		if err := clearstart(); err != nil {
+			logger.log(fmt.Sprintf("Failed to clear startup folder: %v", err), true)
+		}
 		reboot()
 	}
 
@@ -268,9 +283,16 @@ func cpd(src, dst string) error {
 		logger.Printf("[ERROR] Failed to read directory %s: %v", src, err)
 		return fmt.Errorf("failed to read directory %s: %w", src, err)
 	}
+
+	if err := os.MkdirAll(dst, os.ModePerm); err != nil {
+		logger.Printf("[ERROR] Failed to create destination directory %s: %v", dst, err)
+		return fmt.Errorf("failed to create destination directory %s: %w", dst, err)
+	}
+
 	for _, entry := range entries {
 		srcPath := filepath.Join(src, entry.Name())
 		dstPath := filepath.Join(dst, entry.Name())
+
 		if entry.IsDir() {
 			if err := cpd(srcPath, dstPath); err != nil {
 				return err
@@ -361,6 +383,10 @@ func pkgs(tempDir string) error {
 		return fmt.Errorf("failed to configure vscode: %w", err)
 	}
 
+	if err := cfgapps(tempDir); err != nil {
+		return fmt.Errorf("failed to configure applications: %w", err)
+	}
+
 	for _, pkgName := range cfg.Pkgs {
 		if pkgName == "git" || pkgName == "vscode" {
 			continue
@@ -369,6 +395,7 @@ func pkgs(tempDir string) error {
 			return fmt.Errorf("failed to install %s: %w", pkgName, err)
 		}
 	}
+
 	return nil
 }
 
@@ -411,6 +438,30 @@ func cfggit() error {
 	return nil
 }
 
+func cfgapps(tempDir string) error {
+	logger.log("🔧 Configuring applications...", false)
+
+	for appName, appConfig := range cfg.Apps {
+		sourcePath := filepath.Join(tempDir, appConfig.SourcePath)
+		destPath := os.ExpandEnv(appConfig.DestPath)
+
+		destDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(destDir, os.ModePerm); err != nil {
+			logger.log(fmt.Sprintf("Failed to create directory for %s: %v", appName, err), true)
+			continue
+		}
+
+		if err := cpf(sourcePath, destPath); err != nil {
+			logger.log(fmt.Sprintf("Failed to configure %s: %v", appName, err), true)
+		} else {
+			logger.log(fmt.Sprintf("✅ Configured %s", appName), false)
+		}
+	}
+
+	logger.log("✅ Application configuration completed", false)
+	return nil
+}
+
 func pkg(name string) error {
 	logger.log(fmt.Sprintf("📦 Installing %s...", name), false)
 
@@ -429,6 +480,34 @@ func pkg(name string) error {
 		logger.log(fmt.Sprintf("ℹ️ %s installation completed, but the expected output was not found. Please check manually.", name), false)
 	}
 
+	return nil
+}
+
+func clearstart() error {
+	logger.log("🧹 Clearing startup folder...", false)
+
+	startupFolders := []string{
+		filepath.Join(os.Getenv("APPDATA"), "Microsoft", "Windows", "Start Menu", "Programs", "Startup"),
+		filepath.Join(os.Getenv("ProgramData"), "Microsoft", "Windows", "Start Menu", "Programs", "Startup"),
+	}
+
+	for _, folder := range startupFolders {
+		entries, err := os.ReadDir(folder)
+		if err != nil {
+			return fmt.Errorf("failed to read startup folder %s: %w", folder, err)
+		}
+
+		for _, entry := range entries {
+			path := filepath.Join(folder, entry.Name())
+			if err := os.Remove(path); err != nil {
+				logger.log(fmt.Sprintf("Failed to remove %s: %v", path, err), true)
+			} else {
+				logger.log(fmt.Sprintf("Removed %s from startup", path), false)
+			}
+		}
+	}
+
+	logger.log("✅ Startup folder cleared", false)
 	return nil
 }
 
