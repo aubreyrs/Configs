@@ -43,3 +43,48 @@ apps:
 git:
   userName: "aubrey"
   userEmail: "cat@aubrey.rs"
+vscode:
+  settingsPath: "${APPDATA}/Code/User/settings.json"
+  extensions:
+    - 1yib.rust-bundle
+    - 766b.go-outliner
+    - austenc.tailwind-docs
+    - bourhaouta.tailwindshades
+    - bradlc.vscode-tailwindcss
+    - catppuccin.catppuccin-vsc
+    - catppuccin.catppuccin-vsc-icons
+    - dunstontc.vscode-go-syntax
+    - dustypomerleau.rust-syntax
+    - golang.go
+    - jinliming2.vscode-go-template
+    - jscearcy.rust-doc-viewer
+    - leonardssh.vscord
+    - ms-python.debugpy
+    - ms-python.python
+    - ms-python.vscode-pylance
+    - ms-vscode-remote.remote-wsl
+    - ms-vscode.cmake-tools
+    - ms-vscode.cpptools
+    - ms-vscode.cpptools-extension-pack
+    - ms-vscode.cpptools-themes
+    - msyrus.go-doc
+    - premparihar.gotestexplorer
+    - quillaja.goasm
+    - redhat.java
+    - rust-lang.rust-analyzer
+    - serayuzgur.crates
+    - shd101wyy.markdown-preview-enhanced
+    - swellaby.rust-pack
+    - tamasfe.even-better-toml
+    - twxs.cmake
+    - visualstudioexptteam.intellicode-api-usage-examples
+    - visualstudioexptteam.vscodeintellicode
+    - vscjava.vscode-gradle
+    - vscjava.vscode-java-debug
+    - vscjava.vscode-java-dependency
+    - vscjava.vscode-java-pack
+    - vscjava.vscode-java-test
+    - vscjava.vscode-maven
+    - windmilleng.vscode-go-autotest
+    - zarifprogrammer.tailwind-snippets
+    - zhangyue.rust-mod-generator

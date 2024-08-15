@@ -28,12 +28,18 @@ type GitConfig struct {
 	UserEmail string `yaml:"userEmail"`
 }
 
+type VSCodeConfig struct {
+	Extensions   []string `yaml:"extensions"`
+	SettingsPath string   `yaml:"settingsPath"`
+}
+
 type Config struct {
 	RepoURL string               `yaml:"repoUrl"`
 	Dirs    []string             `yaml:"dirs"`
 	Pkgs    []string             `yaml:"pkgs"`
 	Apps    map[string]AppConfig `yaml:"apps"`
 	Git     GitConfig            `yaml:"git"`
+	VSCode  VSCodeConfig         `yaml:"vscode"`
 }
 
 type Logger struct {
@@ -354,36 +360,6 @@ func cpf(src, dst string) error {
 	return nil
 }
 
-func installvscext(extensionsFile string) error {
-	file, err := os.Open(extensionsFile)
-	if err != nil {
-		logger.Printf("[ERROR] Failed to open extensions file %s: %v", extensionsFile, err)
-		return fmt.Errorf("failed to open extensions file %s: %w", extensionsFile, err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		extension := strings.TrimSpace(scanner.Text())
-		if extension != "" {
-			cmd := exec.Command("code", "--install-extension", extension)
-			output, err := cmd.CombinedOutput()
-			if err != nil {
-				logger.Printf("[ERROR] Failed to install VSCode extension %s: %v\nOutput: %s", extension, err, string(output))
-				return fmt.Errorf("failed to install VSCode extension %s: %w", extension, err)
-			}
-			logger.log(fmt.Sprintf("✅ Installed VSCode extension: %s", extension), false)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		logger.Printf("[ERROR] Failed to read extensions file %s: %v", extensionsFile, err)
-		return fmt.Errorf("failed to read extensions file %s: %w", extensionsFile, err)
-	}
-
-	return nil
-}
-
 func pkgs(tempDir string) error {
 	if err := pkg("git"); err != nil {
 		return fmt.Errorf("failed to install git: %w", err)
@@ -420,13 +396,18 @@ func pkgs(tempDir string) error {
 func cfgvsc(tempDir string) error {
 	logger.log("🔧 Configuring Visual Studio Code...", false)
 
-	extensionsFile := filepath.Join(tempDir, "Pixie", "Apps", "Visual Studio Code", "extensions.txt")
-	if err := installvscext(extensionsFile); err != nil {
-		return fmt.Errorf("failed to install VSCode extensions: %w", err)
+	for _, extension := range cfg.VSCode.Extensions {
+		cmd := exec.Command("code", "--install-extension", extension)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			logger.Printf("[ERROR] Failed to install VSCode extension %s: %v\nOutput: %s", extension, err, string(output))
+			return fmt.Errorf("failed to install VSCode extension %s: %w", extension, err)
+		}
+		logger.log(fmt.Sprintf("✅ Installed VSCode extension: %s", extension), false)
 	}
 
 	settingsSrc := filepath.Join(tempDir, "Pixie", "Apps", "Visual Studio Code", "settings.json")
-	settingsDst := filepath.Join(os.Getenv("APPDATA"), "Code", "User", "settings.json")
+	settingsDst := os.ExpandEnv(cfg.VSCode.SettingsPath)
 	if err := cpf(settingsSrc, settingsDst); err != nil {
 		return fmt.Errorf("failed to copy VSCode settings.json: %w", err)
 	}
