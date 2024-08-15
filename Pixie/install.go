@@ -240,10 +240,36 @@ func inst(what string, tempDir string) error {
 	}
 }
 
+func refreshenv() error {
+	cmd := exec.Command("powershell", "-Command", `
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        $env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")
+        Write-Output $env:Path
+    `)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to refresh environment: %w\nOutput: %s", err, string(output))
+	}
+	logger.log("✅ Environment refreshed", false)
+	logger.Printf("[INFO] Updated PATH: %s", string(output))
+	return nil
+}
+
 func choco() error {
+	logger.log("🍫 Checking Chocolatey installation...", false)
+	cmd := exec.Command("where", "choco")
+	if err := cmd.Run(); err == nil {
+		logger.log("Chocolatey is already installed. Skipping installation.", false)
+		return nil
+	}
+
 	logger.log("🍫 Installing Chocolatey...", false)
 
-	cmd := exec.Command("powershell", "-Command", "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))")
+	cmd = exec.Command("powershell", "-Command", `
+        Set-ExecutionPolicy Bypass -Scope Process -Force;
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    `)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -253,11 +279,18 @@ func choco() error {
 
 	logger.Printf("[INFO] Chocolatey installation output: %s", string(output))
 
-	if strings.Contains(string(output), "Chocolatey (choco.exe) is now ready.") {
-		logger.log("✅ Chocolatey installed successfully", false)
-	} else {
-		logger.log("ℹ️ Chocolatey may have been installed, but the expected output was not found. Please check manually.", false)
+	if err := refreshenv(); err != nil {
+		logger.log(fmt.Sprintf("Failed to refresh environment after Chocolatey installation: %v", err), true)
 	}
+
+	cmd = exec.Command("choco", "--version")
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		logger.Printf("[ERROR] Failed to verify Chocolatey installation: %v\nOutput: %s", err, string(output))
+		return fmt.Errorf("failed to verify Chocolatey installation: %w", err)
+	}
+
+	logger.log(fmt.Sprintf("✅ Chocolatey installed successfully. Version: %s", strings.TrimSpace(string(output))), false)
 
 	return nil
 }
@@ -376,6 +409,10 @@ func pkgs(tempDir string) error {
 		return fmt.Errorf("failed to install git: %w", err)
 	}
 
+	if err := refreshenv(); err != nil {
+		logger.log(fmt.Sprintf("Failed to refresh environment after Git installation: %v", err), true)
+	}
+
 	if err := cfggit(); err != nil {
 		return fmt.Errorf("failed to configure git: %w", err)
 	}
@@ -384,12 +421,12 @@ func pkgs(tempDir string) error {
 		return fmt.Errorf("failed to install vscode: %w", err)
 	}
 
-	if err := cfgvsc(tempDir); err != nil {
-		return fmt.Errorf("failed to configure vscode: %w", err)
+	if err := refreshenv(); err != nil {
+		logger.log(fmt.Sprintf("Failed to refresh environment after VS Code installation: %v", err), true)
 	}
 
-	if err := cfgapps(tempDir); err != nil {
-		return fmt.Errorf("failed to configure applications: %w", err)
+	if err := cfgvsc(tempDir); err != nil {
+		return fmt.Errorf("failed to configure vscode: %w", err)
 	}
 
 	for _, pkgName := range cfg.Pkgs {
@@ -399,6 +436,13 @@ func pkgs(tempDir string) error {
 		if err := pkg(pkgName); err != nil {
 			return fmt.Errorf("failed to install %s: %w", pkgName, err)
 		}
+		if err := refreshenv(); err != nil {
+			logger.log(fmt.Sprintf("Failed to refresh environment after %s installation: %v", pkgName, err), true)
+		}
+	}
+
+	if err := cfgapps(tempDir); err != nil {
+		return fmt.Errorf("failed to configure applications: %w", err)
 	}
 
 	return nil
@@ -407,8 +451,16 @@ func pkgs(tempDir string) error {
 func cfgvsc(tempDir string) error {
 	logger.log("🔧 Configuring Visual Studio Code...", false)
 
+	vscodePath := "C:\\Program Files\\Microsoft VS Code\\bin\\code.cmd"
+	if _, err := os.Stat(vscodePath); os.IsNotExist(err) {
+		vscodePath = "C:\\Program Files (x86)\\Microsoft VS Code\\bin\\code.cmd"
+		if _, err := os.Stat(vscodePath); os.IsNotExist(err) {
+			return fmt.Errorf("VS Code executable not found in expected locations")
+		}
+	}
+
 	for _, extension := range cfg.VSCode.Extensions {
-		cmd := exec.Command("code", "--install-extension", extension)
+		cmd := exec.Command(vscodePath, "--install-extension", extension)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			logger.Printf("[ERROR] Failed to install VSCode extension %s: %v\nOutput: %s", extension, err, string(output))
@@ -430,14 +482,22 @@ func cfgvsc(tempDir string) error {
 func cfggit() error {
 	logger.log("🔧 Configuring global git settings...", false)
 
-	cmd := exec.Command("git", "config", "--global", "user.name", cfg.Git.UserName)
+	gitPath := "C:\\Program Files\\Git\\cmd\\git.exe"
+	if _, err := os.Stat(gitPath); os.IsNotExist(err) {
+		gitPath = "C:\\Program Files (x86)\\Git\\cmd\\git.exe"
+		if _, err := os.Stat(gitPath); os.IsNotExist(err) {
+			return fmt.Errorf("git executable not found in expected locations")
+		}
+	}
+
+	cmd := exec.Command(gitPath, "config", "--global", "user.name", cfg.Git.UserName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to configure git user.name: %v\nOutput: %s", err, string(output))
 		return fmt.Errorf("failed to configure git user.name: %w", err)
 	}
 
-	cmd = exec.Command("git", "config", "--global", "user.email", cfg.Git.UserEmail)
+	cmd = exec.Command(gitPath, "config", "--global", "user.email", cfg.Git.UserEmail)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to configure git user.email: %v\nOutput: %s", err, string(output))
@@ -475,7 +535,8 @@ func cfgapps(tempDir string) error {
 func pkg(name string) error {
 	logger.log(fmt.Sprintf("📦 Installing %s...", name), false)
 
-	cmd := exec.Command("choco", "install", name, "-y")
+	cmd := exec.Command("choco", "install", name, "-y", "--ignore-checksums", "--no-progress")
+	cmd.Env = append(os.Environ(), "ChocolateyIgnoreRebootDetected=true")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to install %s: %v\nOutput: %s", name, err, string(output))
@@ -484,7 +545,7 @@ func pkg(name string) error {
 
 	logger.Printf("[INFO] %s installation output: %s", name, string(output))
 
-	if strings.Contains(string(output), "has been installed") {
+	if strings.Contains(string(output), "has been installed") || strings.Contains(string(output), "has been upgraded") {
 		logger.log(fmt.Sprintf("✅ %s installed successfully", name), false)
 	} else {
 		logger.log(fmt.Sprintf("ℹ️ %s installation completed, but the expected output was not found. Please check manually.", name), false)
