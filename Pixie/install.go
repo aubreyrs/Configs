@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -34,12 +35,13 @@ type VSCodeConfig struct {
 }
 
 type Config struct {
-	RepoURL string               `yaml:"repoUrl"`
-	Dirs    []string             `yaml:"dirs"`
-	Pkgs    []string             `yaml:"pkgs"`
-	Apps    map[string]AppConfig `yaml:"apps"`
-	Git     GitConfig            `yaml:"git"`
-	VSCode  VSCodeConfig         `yaml:"vscode"`
+	RepoURL        string               `yaml:"repoUrl"`
+	Dirs           []string             `yaml:"dirs"`
+	Pkgs           []string             `yaml:"pkgs"`
+	Apps           map[string]AppConfig `yaml:"apps"`
+	Git            GitConfig            `yaml:"git"`
+	VSCode         VSCodeConfig         `yaml:"vscode"`
+	UnattendedMode bool                 `yaml:"unattendedMode"`
 }
 
 type Logger struct {
@@ -57,18 +59,15 @@ type Styles struct {
 }
 
 var (
-	cfg    Config
-	logger *Logger
-	styles Styles
+	cfg        Config
+	logger     *Logger
+	styles     Styles
+	configFile string
 )
 
 func init() {
-	var err error
-	cfg, err = loadcfg("config.yml")
-	if err != nil {
-		fmt.Printf("Error loading configuration: %v\n", err)
-		os.Exit(1)
-	}
+	flag.StringVar(&configFile, "config", "config.yml", "Path to configuration file")
+	flag.Parse()
 
 	flavour := catppuccin.Mocha
 	styles = Styles{
@@ -86,18 +85,27 @@ func loadcfg(filename string) (Config, error) {
 
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return Config{}, fmt.Errorf("could not read config file: %w", err)
+		return Config{}, fmt.Errorf("could not read config file '%s': %w", filename, err)
 	}
 
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		return Config{}, fmt.Errorf("could not parse config file: %w", err)
+		return Config{}, fmt.Errorf("could not parse config file '%s': %w", filename, err)
 	}
 
 	return config, nil
 }
 
 func main() {
+	var err error
+	cfg, err = loadcfg(configFile)
+	if err != nil {
+		fmt.Printf("Error loading configuration from '%s': %v\n", configFile, err)
+		fmt.Println("Please ensure the config file exists and is properly formatted.")
+		fmt.Println("You can specify a different config file using the -config flag.")
+		os.Exit(1)
+	}
+
 	if err := run(); err != nil {
 		fmt.Println(styles.Error.Render(fmt.Sprintf("❌ Error: %v", err)))
 		os.Exit(1)
@@ -150,7 +158,10 @@ func run() error {
 	logger.log("🎉 All tasks completed successfully!", false)
 	logger.Println("Pixie setup script completed successfully")
 
-	if restart() {
+	if cfg.UnattendedMode {
+		logger.log("Unattended mode enabled. Restarting system...", false)
+		reboot()
+	} else if restart() {
 		if err := clearstart(); err != nil {
 			logger.log(fmt.Sprintf("Failed to clear startup folder: %v", err), true)
 		}
