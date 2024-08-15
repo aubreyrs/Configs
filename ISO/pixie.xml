@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Preset isAutoSaved="true" xmlns="urn:schemas-nliteos-com:pn.v1">
-	<Date>08/15/2024 16:04:55</Date>
+	<Date>08/15/2024 17:29:01</Date>
 	<AppInfo>
 		<Version>2024.8.10014</Version>
 		<Licensed>No</Licensed>
@@ -9,7 +9,7 @@
 	</AppInfo>
 	<ImageInfo>
 		<Version mode="offline">Windows 11 Professional 24H2 x64 - 10.0.26100.1 (en-GB)</Version>
-		<GUID>{0900BC2F-231F-42DA-B79E-C33C53DD09F9}</GUID>
+		<GUID>{974B85AE-B435-4B3F-A326-0609CB692EBB}</GUID>
 	</ImageInfo>
 	<RemoveComponents AppRemovalMode="DISM"></RemoveComponents>
 	<Compatibility protectHidden="false">
@@ -66,10 +66,7 @@
 			<Machine enabled="no">VMware VM</Machine>
 		</MachineDrivers>
 	</Compatibility>
-	<Features>
-		<Feature name="VirtualMachinePlatform">true</Feature>
-		<Feature name="HypervisorPlatform">true</Feature>
-	</Features>
+	<Features></Features>
 	<Packages>
 		<Options>
 			<CleanHotfixedLeftovers>0</CleanHotfixedLeftovers>
@@ -89,63 +86,14 @@
 			<ShowHidden>false</ShowHidden>
 		</Options>
 	</Drivers>
-	<Unattended mode="1">
+	<Unattended mode="0">
 		<AnswerFileLocationPanther>false</AnswerFileLocationPanther>
 		<AnswerFileLocationBoot>false</AnswerFileLocationBoot>
 		<SaveBothArch>false</SaveBothArch>
 		<EditionPrompt>false</EditionPrompt>
-		<settings pass="oobeSystem">
-			<component name="Microsoft-Windows-International-Core">
-				<InputLocale>0809:00000809</InputLocale>
-				<SystemLocale>en-GB</SystemLocale>
-				<UILanguage>en-GB</UILanguage>
-				<UILanguageFallback>en-GB</UILanguageFallback>
-				<UserLocale>en-GB</UserLocale>
-			</component>
-			<component name="Microsoft-Windows-Shell-Setup">
-				<TimeZone>GMT Standard Time</TimeZone>
-				<OOBE>
-					<HideEULAPage>true</HideEULAPage>
-					<HideLocalAccountScreen>true</HideLocalAccountScreen>
-					<HideOnlineAccountScreens>true</HideOnlineAccountScreens>
-					<ProtectYourPC>3</ProtectYourPC>
-					<SkipMachineOOBE>true</SkipMachineOOBE>
-					<SkipUserOOBE>true</SkipUserOOBE>
-				</OOBE>
-				<UserAccounts>
-					<LocalAccounts>
-						<LocalAccount>
-							<DisplayName>Aubrey</DisplayName>
-							<Group>Administrators</Group>
-							<Name>aubrey</Name>
-							<Password>
-								<PlainText>false</PlainText>
-								<Value>MwAxADMAMQBQAGEAcwBzAHcAbwByAGQA</Value>
-							</Password>
-						</LocalAccount>
-					</LocalAccounts>
-				</UserAccounts>
-			</component>
-		</settings>
-		<settings pass="specialize">
-			<component name="Microsoft-Windows-Shell-Setup">
-				<ComputerName>pixie</ComputerName>
-			</component>
-		</settings>
 		<settings pass="windowsPE">
-			<component name="Microsoft-Windows-International-Core-WinPE">
-				<InputLocale>0809:00000809</InputLocale>
-				<SystemLocale>en-GB</SystemLocale>
-				<UILanguage>en-GB</UILanguage>
-				<UILanguageFallback>en-GB</UILanguageFallback>
-				<UserLocale>en-GB</UserLocale>
-			</component>
 			<component name="Microsoft-Windows-Setup">
-				<Diagnostics>
-					<OptIn>false</OptIn>
-				</Diagnostics>
 				<DynamicUpdate>
-					<Enable>false</Enable>
 					<WillShowUI>OnError</WillShowUI>
 				</DynamicUpdate>
 				<ImageInstall>
@@ -160,8 +108,6 @@
 					</OSImage>
 				</ImageInstall>
 				<UserData>
-					<AcceptEula>true</AcceptEula>
-					<FullName>aubrey</FullName>
 					<ProductKey>
 						<Key></Key>
 					</ProductKey>
@@ -171,32 +117,9 @@
 	</Unattended>
 	<Tweaks>
 		<Settings>
-			<TweakGroup name="EventLogs">
-				<Tweak name="Microsoft-Windows-DeviceUpdateAgent\Operational\Enabled">0</Tweak>
-				<Tweak name="Microsoft-Windows-WindowsUpdateClient\Operational\Enabled">0</Tweak>
-			</TweakGroup>
-			<TweakGroup name="WindowsUpdateTasks">
-				<Tweak name="CrossDeviceUpdate\CrossDeviceUpdate">0</Tweak>
-				<Tweak name="DevHomeUpdate\DevHomeUpdate">0</Tweak>
-				<Tweak name="EdgeUpdate\EdgeUpdate">0</Tweak>
-				<Tweak name="OutlookUpdate\OutlookUpdate">0</Tweak>
-				<Tweak name="TFLUpdate\TFLUpdate">0</Tweak>
-			</TweakGroup>
 			<TweakGroup name="WindowsUpdate">
-				<Tweak name="DriverSearching\SearchOrderConfig">0</Tweak>
-				<Tweak name="Preferences\ModelDownloadAllowed">0</Tweak>
-				<Tweak name="Device Metadata\PreventDeviceMetadataFromNetwork">1</Tweak>
-				<Tweak name="Settings\AllowAutoWindowsUpdateDownloadOverMeteredNetwork">0</Tweak>
-				<Tweak name="WindowsUpdate\DisableWUfBSafeguards">1</Tweak>
-				<Tweak name="Settings\IsContinuousInnovationOptedIn">0</Tweak>
-				<Tweak name="7971f918-a847-4430-9279-4a52d1efe18d\RegisterWithAU">0</Tweak>
-				<Tweak name="WindowsUpdate\ExcludeWUDriversInQualityUpdate">1</Tweak>
-				<Tweak name="MRT\DontOfferThroughWUAU">1</Tweak>
-				<Tweak name="Settings\HideMCTLink">1</Tweak>
-				<Tweak name="Settings\IsExpedited">0</Tweak>
-				<Tweak name="WindowsStore\AutoDownload">0</Tweak>
-				<Tweak name="AU\NoAutoUpdate">1</Tweak>
-				<Tweak name="AU\AUOptions">2</Tweak>
+				<Tweak name="DriverSearching\SearchOrderConfig">1</Tweak>
+				<Tweak name="AU\NoAutoUpdate">-1</Tweak>
 			</TweakGroup>
 		</Settings>
 		<Services></Services>

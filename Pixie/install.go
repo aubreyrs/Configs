@@ -252,11 +252,15 @@ func refreshenv() error {
 	}
 	logger.log("✅ Environment refreshed", false)
 	logger.Printf("[INFO] Updated PATH: %s", string(output))
+	os.Setenv("PATH", strings.TrimSpace(string(output)))
+
 	return nil
 }
 
 func choco() error {
 	logger.log("🍫 Checking Chocolatey installation...", false)
+
+	// Check if Chocolatey is already installed
 	cmd := exec.Command("where", "choco")
 	if err := cmd.Run(); err == nil {
 		logger.log("Chocolatey is already installed. Skipping installation.", false)
@@ -283,7 +287,8 @@ func choco() error {
 		logger.log(fmt.Sprintf("Failed to refresh environment after Chocolatey installation: %v", err), true)
 	}
 
-	cmd = exec.Command("choco", "--version")
+	chocoPath := `C:\ProgramData\chocolatey\bin\choco.exe`
+	cmd = exec.Command(chocoPath, "--version")
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to verify Chocolatey installation: %v\nOutput: %s", err, string(output))
@@ -291,6 +296,7 @@ func choco() error {
 	}
 
 	logger.log(fmt.Sprintf("✅ Chocolatey installed successfully. Version: %s", strings.TrimSpace(string(output))), false)
+	os.Setenv("PATH", os.Getenv("PATH")+";C:\\ProgramData\\chocolatey\\bin")
 
 	return nil
 }
