@@ -1,0 +1,42 @@
+repoUrl: "https://github.com/aubreyrs/Configs"
+dirs:
+  - Forgeee
+  - Wallpapers
+  - Testing
+  - Tweaks
+  - Git
+  - Minecraft
+  - Scripts
+pkgs:
+  - mingw
+  - prismlauncher
+  - rustup.install
+  - bun
+  - go
+  - spotify
+  - spicetify-cli
+  - llvm
+  - ninja
+  - sharex
+  - ffmpeg
+  - jetbrainstoolbox
+  - vscode
+  - firefox
+  - python
+  - 7zip
+  - git
+  - sysinternals
+  - openssl
+  - wireshark
+  - make
+  - cmake
+  - audacity
+  - lghub
+  - mullvad-app
+  - discord
+  - wireguard
+  - ghidra
+apps:
+  GlazeWM:
+    sourcePath: "Pixie/Apps/GlazeWM/config.yaml"
+    destPath: "${USERPROFILE}/.glaze-wm/config.yaml"

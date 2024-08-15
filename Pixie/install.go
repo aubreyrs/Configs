@@ -15,18 +15,19 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/go-git/go-git/v5"
 	"golang.org/x/sys/windows"
+	"gopkg.in/yaml.v3"
 )
 
 type AppConfig struct {
-	SourcePath string
-	DestPath   string
+	SourcePath string `yaml:"sourcePath"`
+	DestPath   string `yaml:"destPath"`
 }
 
 type Config struct {
-	RepoURL string
-	Dirs    []string
-	Pkgs    []string
-	Apps    map[string]AppConfig
+	RepoURL string               `yaml:"repoUrl"`
+	Dirs    []string             `yaml:"dirs"`
+	Pkgs    []string             `yaml:"pkgs"`
+	Apps    map[string]AppConfig `yaml:"apps"`
 }
 
 type Logger struct {
@@ -50,16 +51,11 @@ var (
 )
 
 func init() {
-	cfg = Config{
-		RepoURL: "https://github.com/aubreyrs/Configs",
-		Dirs:    []string{"Forge", "Wallpapers", "Testing", "Tweaks", "Git", "Minecraft", "Scripts"},
-		Pkgs:    []string{"mingw", "prismlauncher", "rustup.install", "bun", "go", "spotify", "spicetify-cli", "llvm", "ninja", "sharex", "ffmpeg", "jetbrainstoolbox", "vscode", "firefox", "python", "7zip", "git", "sysinternals", "openssl", "wireshark", "make", "cmake", "audacity", "lghub", "mullvad-app", "discord", "wireguard", "ghidra"},
-		Apps: map[string]AppConfig{
-			"GlazeWM": {
-				SourcePath: "Pixie/Apps/GlazeWM/config.yaml",
-				DestPath:   "${USERPROFILE}/.glaze-wm/config.yaml",
-			},
-		},
+	var err error
+	cfg, err = loadcfg("config.yml")
+	if err != nil {
+		fmt.Printf("Error loading configuration: %v\n", err)
+		os.Exit(1)
 	}
 
 	flavour := catppuccin.Mocha
@@ -71,6 +67,22 @@ func init() {
 		Highlight: lipgloss.NewStyle().Foreground(lipgloss.Color(flavour.Peach().Hex)).Underline(true),
 		Box:       lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color(flavour.Overlay0().Hex)),
 	}
+}
+
+func loadcfg(filename string) (Config, error) {
+	var config Config
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return Config{}, fmt.Errorf("could not read config file: %w", err)
+	}
+
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return Config{}, fmt.Errorf("could not parse config file: %w", err)
+	}
+
+	return config, nil
 }
 
 func main() {
