@@ -1,6 +1,6 @@
 repoUrl: "https://github.com/aubreyrs/Configs"
 dirs:
-  - Forgeee
+  - Forge
   - Wallpapers
   - Testing
   - Tweaks
@@ -40,3 +40,6 @@ apps:
   GlazeWM:
     sourcePath: "Pixie/Apps/GlazeWM/config.yaml"
     destPath: "${USERPROFILE}/.glaze-wm/config.yaml"
+git:
+  userName: "aubrey"
+  userEmail: "cat@aubrey.rs"

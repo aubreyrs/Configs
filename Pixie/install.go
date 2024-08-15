@@ -23,11 +23,17 @@ type AppConfig struct {
 	DestPath   string `yaml:"destPath"`
 }
 
+type GitConfig struct {
+	UserName  string `yaml:"userName"`
+	UserEmail string `yaml:"userEmail"`
+}
+
 type Config struct {
 	RepoURL string               `yaml:"repoUrl"`
 	Dirs    []string             `yaml:"dirs"`
 	Pkgs    []string             `yaml:"pkgs"`
 	Apps    map[string]AppConfig `yaml:"apps"`
+	Git     GitConfig            `yaml:"git"`
 }
 
 type Logger struct {
@@ -432,14 +438,14 @@ func cfgvsc(tempDir string) error {
 func cfggit() error {
 	logger.log("🔧 Configuring global git settings...", false)
 
-	cmd := exec.Command("git", "config", "--global", "user.name", "aubrey")
+	cmd := exec.Command("git", "config", "--global", "user.name", cfg.Git.UserName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to configure git user.name: %v\nOutput: %s", err, string(output))
 		return fmt.Errorf("failed to configure git user.name: %w", err)
 	}
 
-	cmd = exec.Command("git", "config", "--global", "user.email", "cat@aubrey.rs")
+	cmd = exec.Command("git", "config", "--global", "user.email", cfg.Git.UserEmail)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		logger.Printf("[ERROR] Failed to configure git user.email: %v\nOutput: %s", err, string(output))
